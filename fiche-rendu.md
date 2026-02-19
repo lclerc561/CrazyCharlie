@@ -49,7 +49,7 @@ Et une image aussi :
 
 ##  Partie Optimisation ##
 
-Nous avons développé une solution en Java modulaire pour résoudre le problème de répartition des jouets (ToyBoxing).
+Nous avons développé une solution en Java pour résoudre le problème de répartition des jouets (ToyBoxing).
 
 ### Architecture
 - **Langage** : Java 21
@@ -61,7 +61,15 @@ Nous avons développé une solution en Java modulaire pour résoudre le problèm
   - `com.toysacademy.ServerHTTP` : API REST native pour l'intégration avec l'application Web.
 
 ### Améliorations et Stratégies d'Optimisation
-Au-delà de l'énoncé de base, nous avons implémenté plusieurs **stratégies avancées** pour maximiser le score :
+
+Nous avons premièrement créé une fonction de scoring pour calculer la valeur  d'une option en fonction de l'énoncé proposé.
+Ces scores sont ensuite comparés, et en fonction de différents algorithmes, traités.
+
+Nous avons décidé d'implémenter plusieurs algorithmes différents en parallèle (méthode abstraite d'une classe abstraite Algo) pour tester les différents algorithmes et travailler en parallèle.
+
+La version finale de notre serveur HTTP fait tourner plusieurs algorithmes (Glouton, Recuit Simulé, Bin packing et Génétique) les uns à la suite des autres (cela dure quelques secondes), puis choisit l'algorithme ayant retourné le plus gros score.
+
+Au-delà de l'énoncé de base, nous avons implémenté les **stratégies suggérées** pour maximiser le score :
 
 1.  **Gestion des Contraintes Souples (Soft Constraints)** :
     Contrairement à une approche rigide, notre système **tolère le dépassement du budget** (10€-60€) ou un léger déséquilibre d'équité si cela permet d'inclure des articles à très forte valeur ajoutée. L'algorithme accepte de payer une pénalité (ex: -5 points) pour gagner davantage (ex: +20 points), ce qui débloque des solutions inaccessibles autrement.
