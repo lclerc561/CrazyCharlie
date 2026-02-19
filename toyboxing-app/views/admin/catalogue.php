@@ -106,7 +106,11 @@ $queryParams = $_GET ?? [];
                                     class="btn btn-sm btn-outline-secondary">
                                         Modifier
                                 </a>
-
+                                <a href="/admin/article/supprimer?id=<?= $art['id'] ?>" 
+                                    class="btn btn-sm btn-outline-danger"
+                                    onclick="return confirm('Voulez-vous vraiment supprimer cet article ?');">
+                                        supprimer
+                                </a>
                             </td>
                         </tr>
                         <?php endforeach; ?>

@@ -141,5 +141,23 @@ class ArticleController
         exit;
     }
 
+    public function supprimer()
+    {
+        $id = $_GET['id'] ?? null;
+
+        if (!$id) {
+            die("ID manquant.");
+        }
+
+        $db = Database::getConnection();
+
+        $stmt = $db->prepare("DELETE FROM articles WHERE id = :id");
+        $stmt->execute(['id' => $id]);
+
+        header('Location: /admin/catalogue');
+        exit;
+    }
+
+
 
 }
