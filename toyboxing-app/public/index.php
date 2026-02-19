@@ -3,6 +3,7 @@ require_once __DIR__ . '/../src/Database.php';
 require_once __DIR__ . '/../src/controllers/AbonneController.php';
 require_once __DIR__ . '/../src/controllers/ArticleController.php';
 require_once __DIR__ . '/../src/controllers/AdminController.php';
+
 // 1. On récupère l'URL demandée (ex: /admin/catalogue)
 $request = $_SERVER['REQUEST_URI'];
 $path = parse_url($request, PHP_URL_PATH);
@@ -68,7 +69,6 @@ switch ($path) {
             $whereSQL = " WHERE " . implode(" AND ", $where);
         }
 
-
         // --- TRI ---
         $allowedSort = [
             'categorie' => 'c.libelle',
@@ -94,7 +94,7 @@ switch ($path) {
         LEFT JOIN categorie c ON a.categorie = c.id
         $whereSQL
         $orderBy
-    ";
+        ";
 
         $stmt = $db->prepare($sql);
         $stmt->execute($params);
@@ -108,12 +108,10 @@ switch ($path) {
             'currentSort' => $sort,
             'currentOrder' => $order
         ]);
-
         break;
 
     case '/admin/article/ajouter':
         $articleController = new ArticleController();
-
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $articleController->ajouter();
         } else {
@@ -123,7 +121,6 @@ switch ($path) {
     
     case '/admin/article/modifier':
         $articleController = new ArticleController();
-
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $articleController->modifier();
         } else {
@@ -133,52 +130,29 @@ switch ($path) {
 
     case '/admin/article/supprimer':
         $articleController = new ArticleController();
-
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $articleController->supprimer();
         } else {
             $articleController->supprimer();
         }
         break;
-        break;
 
+    // --- LE MOTEUR DE CAMPAGNE (Java 8080) ---
     case '/admin/campagne':
-        $db = Database::getConnection();
-        // On récupère les box enregistrées en liant abonnés, contenus et articles
-        $stmt = $db->query("
-            SELECT a.prenom as abonne_nom, art.id, art.libelle, c.libelle as categorie_nom, art.age, art.etat, art.prix, art.poids
-            FROM box_lien bl
-            JOIN abonnes a ON bl.id_abo = a.id
-            JOIN box_contenu bc ON bl.id_contenu = bc.id
-            JOIN articles art ON bc.id_article = art.id
-            LEFT JOIN categorie c ON art.categorie = c.id
-        ");
-        $lignes = $stmt->fetchAll();
-
-        $boxes = [];
-        // On regroupe les articles par prénom d'abonné
-        foreach ($lignes as $ligne) {
-            $abonne = $ligne['abonne_nom'];
-            if (!isset($boxes[$abonne])) {
-                $boxes[$abonne] = ['articles' => [], 'poids_total' => 0, 'prix_total' => 0];
-            }
-            $boxes[$abonne]['articles'][] = $ligne;
-            $boxes[$abonne]['poids_total'] += $ligne['poids'];
-            $boxes[$abonne]['prix_total'] += $ligne['prix'];
+        $adminController = new AdminController();
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $adminController->lancerCampagne(); // Appelle le Java si on clique sur Lancer
+        } else {
+            $adminController->showCampagne(); // Affiche l'historique par défaut
         }
-
-        renderView('admin/campagne', [
-            'title' => 'Campagne de Box',
-            'boxes' => $boxes,
-            'scoreTotal' => 0
-        ]);
         break;
 
-    case '/admin/article/ajouter':
-        $articleController = new ArticleController();
-        $articleController->ajouter();
+    case '/admin/box/valider':
+        $adminController = new AdminController();
+        $adminController->validerBox(); // Permet de sauvegarder la box générée
         break;
         
+    // --- CONNEXION / DÉCONNEXION ---
     case '/connexion':
         $abonneController = new AbonneController();
         $abonneController->connexion();
