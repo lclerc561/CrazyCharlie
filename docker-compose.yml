@@ -2,12 +2,15 @@ services:
   # L'app PHP
   web-app:
     build: .
+    extra_hosts:
+      - "localhost:host-gateway" 
     ports:
-      - "9000:80" # Port standard HTTP
+      - "9000:80"
     depends_on:
       - db
 
-  # Ta BDD MariaDB (Rien ne change, c'est nickel)
+
+  # Ta BDD MariaDB
   db:
     image: mariadb:10.11
     restart: always
@@ -25,5 +28,8 @@ services:
     environment:
       - PMA_HOST=db
 
+  
+
 volumes:
   db_data:
+
