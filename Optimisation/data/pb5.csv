@@ -1,0 +1,44 @@
+articles
+a1;Uno Junior;SOC;PE;N;5;200
+a2;Poupée Clara;FIG;PE;TB;7;350
+a3;Duplo Ferme;CON;PE;B;9;500
+a4;Ballon sauteur;EXT;PE;N;6;400
+a5;Mon premier imagier;LIV;PE;TB;3;150
+a6;Puzzle animaux;EVL;PE;N;4;250
+a7;Dominos couleurs;SOC;PE;TB;3;200
+a8;Cubes alphabet;CON;PE;N;5;300
+a9;Cluedo Junior;SOC;EN;B;8;500
+a10;Figurine chevalier;FIG;EN;N;6;200
+a11;Lego City caserne;CON;EN;TB;20;700
+a12;Corde à sauter;EXT;EN;N;2;100
+a13;Globe interactif;EVL;EN;B;18;600
+a14;Le Petit Nicolas;LIV;EN;TB;5;200
+a15;Puissance 4;SOC;EN;N;7;300
+a16;Meccano voiture;CON;EN;B;12;500
+a17;Peluche musicale;EVL;BB;TB;8;250
+a18;Livre tissu jungle;LIV;BB;N;4;100
+a19;Hochet dentition;EVL;BB;B;3;80
+a20;Cube sensoriel;CON;BB;TB;5;200
+a21;Sophie la Girafe;FIG;BB;N;10;150
+a22;Monopoly classique;SOC;AD;TB;12;600
+a23;Manga One Piece T1;LIV;AD;B;8;200
+a24;Maquette avion;CON;AD;N;15;400
+a25;Skateboard;EXT;AD;TB;20;800
+a26;Kit Arduino;EVL;AD;N;25;300
+a27;Memory animaux;SOC;BB;N;4;150
+a28;Cerf-volant;EXT;EN;TB;5;300
+a29;Livre d'images bébé;LIV;BB;N;3;100
+a30;Figurine collector;FIG;AD;TB;18;250
+
+abonnes
+s1;Emma;PE;SOC,FIG,EVL,CON,LIV,EXT
+s2;Lucas;EN;EXT,CON,EVL,SOC,FIG,LIV
+s3;Chloé;BB;EVL,LIV,CON,FIG,SOC,EXT
+s4;Hugo;EN;SOC,CON,EXT,FIG,EVL,LIV
+s5;Inès;AD;EVL,CON,EXT,SOC,LIV,FIG
+s6;Léa;PE;FIG,EVL,SOC,LIV,CON,EXT
+s7;Nathan;EN;CON,EXT,SOC,FIG,EVL,LIV
+s8;Jade;PE;EVL,LIV,FIG,SOC,CON,EXT
+
+parametres
+1500
