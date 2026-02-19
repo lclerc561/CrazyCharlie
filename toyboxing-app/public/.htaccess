@@ -1,0 +1,8 @@
+RewriteEngine On
+
+# verif si dossier existe
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# renvoi la requête à index.php
+RewriteRule ^ index.php [L]
