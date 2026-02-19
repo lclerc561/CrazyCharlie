@@ -23,16 +23,16 @@ public class Main {
             System.out.println("Chargement de " + donnees.articles.size()
                     + " articles et " + donnees.abonnes.size() + " abonnés.");
 
-            EvaluateurScoreGlouton evaluateurGlouton = new EvaluateurScoreGlouton();
+            EvaluateurScoreGlouton evaluateur = new EvaluateurScoreGlouton();
             CSVManager csvManager = new CSVManager();
 
-            // Modèle Glouton
-            Algo modeleGlouton = new ModeleGlouton();
-            Composition solutionGlouton = modeleGlouton.resoudre(
+            // Modèle GloutonDescente (par défaut)
+            Algo modele = new ModeleGloutonDescente();
+            Composition solution = modele.resoudre(
                     donnees.abonnes, donnees.articles, donnees.poidsMax);
-            double scoreGlouton = evaluateurGlouton.evaluer(solutionGlouton, donnees.poidsMax);
-            System.out.println("Score " + modeleGlouton.getNom() + " : " + (int) scoreGlouton);
-            csvManager.sauvegarderSolution("results/solution_modeleglouton.csv", solutionGlouton, scoreGlouton);
+            double score = evaluateur.evaluer(solution, donnees.poidsMax);
+            System.out.println("Score " + modele.getNom() + " : " + (int) score);
+            csvManager.sauvegarderSolution("results/solution_gloutondescente.csv", solution, score);
 
         } catch (Exception e) {
             e.printStackTrace();

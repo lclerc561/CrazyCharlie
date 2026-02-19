@@ -9,27 +9,32 @@ import com.toysacademy.service.*;
 // unused import removed
 
 /**
- * main.java.com.toysacademy.Lanceur de benchmarking pour ModeleGlouton.
+ * Lanceur de benchmarking multi-modèles.
  *
- * Exécute ModeleGlouton sur les données d'entrée,
- * calcule le score et sauvegarde la solution en CSV.
+ * Exécute tous les modèles d'optimisation sur les données d'entrée,
+ * compare les scores et sauvegarde les solutions en CSV.
  *
  * Utilisation :
- * java com.toysacademy.main.java.com.toysacademy.Lanceur [fichier_donnees]
- * (par défaut : data_example.txt)
+ * java com.toysacademy.Lanceur [fichier_donnees]
+ * (par défaut : data/pb5.csv)
  */
 public class Lanceur {
 
-    // Liste des modèles disponibles (Uniquement ModeleGlouton)
+    // Liste des modèles disponibles
     private static final Algo[] MODELES = {
-            new ModeleGlouton()
+            new ModeleGlouton(),
+            new ModeleGloutonDescente(),
+            new ModeleRecuitSimule(),
+            new ModeleBacktracking(),
+            new ModeleBinPacking(),
+            new ModeleGenetique()
     };
 
     public static void main(String[] args) {
         String cheminFichier = args.length > 0 ? args[0] : "./data/pb5.csv";
 
         System.out.println("╔══════════════════════════════════════════════════════╗");
-        System.out.println("║     ToyBoxing — Benchmarking ModeleGlouton          ║");
+        System.out.println("║     ToyBoxing — Benchmarking Multi-Modèles          ║");
         System.out.println("╚══════════════════════════════════════════════════════╝");
         System.out.println();
 
