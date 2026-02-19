@@ -1,1 +1,19 @@
 /.idea
+
+
+# Dépendances
+node_modules/
+package-lock.json
+
+# Fichiers temporaires éditeurs
+*.swp
+*~
+.DS_Store
+
+# Logs
+npm-debug.log*
+*.log
+
+# Variables d'environnement
+.env
+.env.local

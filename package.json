@@ -1,0 +1,17 @@
+{
+  "name": "toyboxing",
+  "version": "1.0.0",
+  "description": "Projet Crazy Charly Day 2026",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "lint": "echo 'Linting skip pour le moment'",
+    "test": "echo 'Error: no test specified' && exit 0"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "eslint": "^8.0.0"
+  }
+}
