@@ -1,156 +1,96 @@
 package com.toysacademy.io;
 
-import com.toysacademy.model.*;
-import java.io.*;
-import java.nio.file.*;
-import java.util.*;
+import com.toysacademy.model.Composition;
 
-/**
- * Gestionnaire d'entrée/sortie CSV.
- * Lecture des fichiers séparés (articles.csv, abonnes.csv) et écriture des
- * solutions.
- */
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.*;
+
 public class CSVManager {
 
-    // =========================================================================
-    // Lecture de fichiers séparés (format hérité)
-    // =========================================================================
+    /**
+     * Sauvegarde la solution sur disque (comportement existant).
+     */
+    public void sauvegarderSolution(String cheminFichierSortie, Composition solution, double score) throws IOException {
+        Path p = Paths.get(cheminFichierSortie);
+        Files.createDirectories(p.getParent());
 
-    /** Lit les articles depuis un fichier CSV séparé. */
-    public List<Article> lireArticles(String cheminFichier) throws IOException {
-        List<Article> articles = new ArrayList<>();
-        List<String> lignes = Files.readAllLines(Paths.get(cheminFichier));
-
-        for (String ligne : lignes) {
-            ligne = nettoyerLigne(ligne);
-            if (ligne.isEmpty())
-                continue;
-
-            String[] parties = ligne.split(";");
-            if (parties.length < 5)
-                continue;
-
-            try {
-                String id = parties[0].trim();
-                if (id.equalsIgnoreCase("id") || id.toLowerCase().startsWith("ident"))
-                    continue; // Ignorer l'en-tête
-
-                Category categorie = Category.fromString(parties[1]);
-                Age age = Age.fromString(parties[2]);
-                double poids = Double.parseDouble(parties[3].replace(",", ".").trim());
-                State etat = State.fromString(parties[4]);
-
-                articles.add(new Article(id, categorie, age, poids, etat));
-            } catch (Exception e) {
-                System.err.println("Ligne article ignorée : " + ligne + " -> " + e.getMessage());
-            }
+        try (Writer w = Files.newBufferedWriter(p, StandardCharsets.UTF_8)) {
+            writeSolution(w, solution, score);
         }
-        return articles;
     }
-
-    /** Lit les abonnés depuis un fichier CSV séparé. */
-    public List<Abonne> lireAbonnes(String cheminFichier) throws IOException {
-        List<Abonne> abonnes = new ArrayList<>();
-        List<String> lignes = Files.readAllLines(Paths.get(cheminFichier));
-
-        for (String ligne : lignes) {
-            ligne = nettoyerLigne(ligne);
-            if (ligne.isEmpty())
-                continue;
-
-            String[] parties = ligne.split(";");
-            if (parties.length < 3)
-                continue;
-
-            try {
-                String id = parties[0].trim();
-                if (id.equalsIgnoreCase("id") || id.toLowerCase().startsWith("ident"))
-                    continue;
-
-                Age trancheAge = Age.fromString(parties[1]);
-                List<Category> preferences = new ArrayList<>();
-                for (int i = 2; i < parties.length; i++) {
-                    String pref = parties[i].trim();
-                    if (!pref.isEmpty()) {
-                        preferences.add(Category.fromString(pref));
-                    }
-                }
-
-                abonnes.add(new Abonne(id, trancheAge, preferences));
-            } catch (Exception e) {
-                System.err.println("Ligne abonné ignorée : " + ligne + " -> " + e.getMessage());
-            }
-        }
-        return abonnes;
-    }
-
-    // Alias de compatibilité
-    public List<Article> readArticles(String f) throws IOException {
-        return lireArticles(f);
-    }
-
-    public List<Abonne> readAbonnes(String f) throws IOException {
-        return lireAbonnes(f);
-    }
-
-    // =========================================================================
-    // Écriture des solutions
-    // =========================================================================
 
     /**
-     * Génère le contenu CSV de la solution.
-     * Première ligne = score, puis une ligne par article affecté.
+     * Renvoie le CSV de la solution sous forme de String (pour réponse HTTP).
+     * Format IDENTIQUE à sauvegarderSolution car on réutilise writeSolution.
      */
-    public String genererContenuCsv(Composition composition, double scoreGlobal) {
-        StringBuilder sb = new StringBuilder();
-        sb.append((int) scoreGlobal).append(System.lineSeparator());
-
-        for (Box box : composition.getBoxes()) {
-            String prenom = box.getAbonne().getPrenom();
-            for (Article article : box.getArticles()) {
-                sb.append(prenom).append("; ")
-                        .append(article.getIdentifiant()).append("; ")
-                        .append(article.getCategorie()).append("; ")
-                        .append(article.getTrancheAge()).append("; ")
-                        .append(article.getEtat())
-                        .append(System.lineSeparator());
-            }
+    public String solutionToCsvString(Composition solution, double score) {
+        StringWriter sw = new StringWriter();
+        try {
+            writeSolution(sw, solution, score);
+        } catch (IOException e) {
+            // StringWriter ne jette normalement pas IOException,
+            // mais on garde la signature propre.
+            throw new UncheckedIOException(e);
         }
-        return sb.toString();
+        return sw.toString();
     }
 
-    /** Sauvegarde la solution dans un fichier CSV. */
-    public void sauvegarderSolution(String cheminFichier, Composition composition,
-            double scoreGlobal) throws IOException {
-        String contenu = genererContenuCsv(composition, scoreGlobal);
-        Path chemin = Paths.get(cheminFichier);
-        // Créer les répertoires parents si nécessaire
-        if (chemin.getParent() != null) {
-            Files.createDirectories(chemin.getParent());
-        }
-        try (PrintWriter ecrivain = new PrintWriter(
-                Files.newBufferedWriter(chemin))) {
-            ecrivain.print(contenu);
-        }
-    }
+    /**
+     * Méthode commune : écrit la solution dans un Writer.
+     * ==> C'est LA source unique du format CSV.
+     */
+    private void writeSolution(Writer writer, Composition solution, double score) throws IOException {
+        BufferedWriter bw = (writer instanceof BufferedWriter) ? (BufferedWriter) writer : new BufferedWriter(writer);
 
-    // Alias de compatibilité
-    public String generateCsvContent(Composition c, double s) {
-        return genererContenuCsv(c, s);
-    }
+        // 1) Première ligne : score entier (comme vous le faites déjà)
+        bw.write(String.valueOf((int) score));
+        bw.newLine();
 
-    public void writeSolution(String f, Composition c, double s) throws IOException {
-        sauvegarderSolution(f, c, s);
-    }
+        // 2) Lignes suivantes : affectations
+        // ------------------------------------------------------------------
+        // ADAPTEZ ICI : selon votre modèle Composition
+        //
+        // L'énoncé montre un format du genre:
+        // AbonnePrenom;ArticleId;Categorie;Age;Etat
+        //
+        // Vous devez itérer sur vos affectations.
+        //
+        // Exemple A (si vous avez une liste d'objets affectation):
+        // for (Affectation aff : solution.getAffectations()) { ... }
+        //
+        // Exemple B (si Composition stocke un mapping abonné->liste d'articles):
+        // for (Abonne ab : solution.getAbonnes()) { for (Article a : solution.getArticlesPour(ab)) ...}
+        //
+        // IMPORTANT : gardez exactement le même ordre/format que votre CSV actuel.
+        // ------------------------------------------------------------------
 
-    /** Nettoie une ligne : supprime espaces et points-virgules en fin de ligne. */
-    private String nettoyerLigne(String ligne) {
-        if (ligne == null)
-            return "";
-        ligne = ligne.trim();
-        while (ligne.endsWith(";")) {
-            ligne = ligne.substring(0, ligne.length() - 1).trim();
-        }
-        return ligne;
+        // ======== EXEMPLE GENERIQUE (à adapter) ========
+        // Supposons:
+        // - solution.getLignesCsv() renvoie déjà les lignes au bon format (si vous avez ça)
+        // for (String line : solution.getLignesCsv()) {
+        //     bw.write(line);
+        //     bw.newLine();
+        // }
+
+        // ======== ADAPTATION COURANTE (mapping abonné -> articles) ========
+        // Si votre Composition a une méthode genre: solution.getAffectations()
+        // et que chaque affectation a: abonneNom/prenom, articleId, categorie, age, etat
+        //
+        // for (var aff : solution.getAffectations()) {
+        //     bw.write(aff.getAbonnePrenom() + ";" +
+        //              aff.getArticleId() + ";" +
+        //              aff.getCategorie() + ";" +
+        //              aff.getAge() + ";" +
+        //              aff.getEtat());
+        //     bw.newLine();
+        // }
+
+        // >>> À VOUS de remplacer ce bloc par votre itération réelle. <<<
+        throw new IllegalStateException(
+                "CSVManager.writeSolution(): adaptez la partie 'AFFECTATIONS' à votre structure Composition."
+        );
+
+        // bw.flush(); // flush en fin si vous retirez l'exception
     }
 }
