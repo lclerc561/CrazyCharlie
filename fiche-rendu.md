@@ -20,7 +20,16 @@
 
 ### Liste des numéros de fonctionnalités implantées ###
 
-<!-- Énumération de la liste, commentaires au besoin -->
+- 1
+- 2
+- 3
+- 4
+- 6
+- 9
+- 10
+- 11
+- 12
+- 15
 
 ### Commentaires additionnels ###
 
