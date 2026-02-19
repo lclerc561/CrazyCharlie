@@ -2,11 +2,12 @@ name: ToyBoxing CI
 
 on:
   push:
-    branches: [ main ]
+    branches: ["**"]
   pull_request:
     branches: [ main ]
 
 jobs:
+  # ÉTAPE 1 : QUALITÉ DU CODE
   quality:
     runs-on: ubuntu-latest
     steps:
@@ -23,3 +24,19 @@ jobs:
         
       - name: Run Lint
         run: npm run lint
+        
+      - name: Security Audit
+        run: npm audit --audit-level=high
+
+  # ÉTAPE 2 : VÉRIFICATION DOCKER (L'étape cruciale)
+  # Ici, on teste que le Dockerfile est bon, sans l'envoyer sur un serveur
+  docker-check:
+    needs: quality
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Build Docker Image (Dry Run)
+        run: |
+          docker build -t toyboxing-test .
+          echo "Le Dockerfile est valide et l'image se construit sans erreur !"
