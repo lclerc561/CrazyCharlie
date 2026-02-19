@@ -1,39 +1,35 @@
 <?php
-// src/Controllers/AbonneController.php
 
 require_once __DIR__ . '/../Database.php';
 
 class AbonneController
 {
-    // Gère la page d'accueil (affichage du formulaire ou traitement)
     public function inscription()
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $db = Database::getConnection();
 
             $prenom = trim($_POST['prenom'] ?? '');
-            $tranche_age = $_POST['tranche_age'] ?? null;
+            $nom = trim($_POST['nom'] ?? '');
             $email = trim($_POST['email'] ?? '');
+            $tranche_age = $_POST['tranche_age'] ?? null;
             
-            // Les préférences (qu'on transforme en chaîne ex: "SOC,FIG,LIV...")
-            // À terme, ton ami BDD devra sûrement adapter la table pour les stocker
             $preferencesArray = $_POST['preferences'] ?? [];
             $preferencesStr = implode(',', $preferencesArray);
 
-            if ($prenom && $tranche_age) {
-                // On insère l'abonné dans la base de données
-                $stmt = $db->prepare("INSERT INTO abonnes (prenom, tranche_age) VALUES (:prenom, :tranche_age)");
+            if ($prenom && $nom && $email && $tranche_age) {
+                $stmt = $db->prepare("INSERT INTO abonnes (prenom, nom, email, tranche_age, preferences) VALUES (:prenom, :nom, :email, :tranche_age, :preferences)");
                 $stmt->execute([
                     ':prenom' => $prenom,
-                    ':tranche_age' => $tranche_age
+                    ':nom' => $nom,
+                    ':email' => $email,
+                    ':tranche_age' => $tranche_age,
+                    ':preferences' => $preferencesStr
                 ]);
             }
 
-            // On crée le cookie pour retenir l'abonné (valable 30 jours)
-            // L'email lui servira d'identifiant pour la suite
             setcookie('abonne_email', $email, time() + (86400 * 30), "/");
 
-            // Redirection vers sa page perso
             header('Location: /ma-box');
             exit;
         } else {
@@ -43,15 +39,40 @@ class AbonneController
         }
     }
 
-    // Gère l'affichage de la page "Ma Box"
     public function maBox()
     {
+        $db = Database::getConnection();
+        
+        $abonne = null;
+        $articles = [];
+
+        if (isset($_COOKIE['abonne_email'])) {
+            $email = $_COOKIE['abonne_email'];
+            
+            $stmt = $db->prepare("SELECT * FROM abonnes WHERE email = :email LIMIT 1");
+            $stmt->execute([':email' => $email]);
+            $abonne = $stmt->fetch();
+
+            if ($abonne) {
+                $stmtBox = $db->prepare("
+                    SELECT art.libelle, c.libelle as categorie_nom, art.etat, art.prix, art.poids
+                    FROM box_lien bl
+                    JOIN box_contenu bc ON bl.id_contenu = bc.id
+                    JOIN articles art ON bc.id_article = art.id
+                    LEFT JOIN categorie c ON art.categorie = c.id
+                    WHERE bl.id_abo = :id_abo
+                ");
+                $stmtBox->execute([':id_abo' => $abonne['id']]);
+                $articles = $stmtBox->fetchAll();
+            }
+        }
+
         $this->render('abonnes/ma-box', [
-            'title' => 'Consulter ma Box'
+            'title' => 'Consulter ma Box',
+            'abonne' => $abonne,
+            'articles' => $articles
         ]);
     }
-
-    // Fonction de rendu (identique à celle de ton ami)
     private function render($view, $variables = [])
     {
         extract($variables);

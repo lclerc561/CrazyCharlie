@@ -2,7 +2,7 @@
     <div class="col-12 col-md-8">
         
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2>Ajouter un don</h2>
+            <h2>Ajouter un article</h2>
             <a href="/admin/catalogue" class="btn btn-outline-secondary">Retour au catalogue</a>
         </div>
 
