@@ -9,7 +9,7 @@ $queryParams = $_GET ?? [];
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2>Catalogue des articles</h2>
-    <a href="/admin/article/ajouter" class="btn btn-primary">+ Ajouter un don</a>
+    <a href="/admin/article/ajouter" class="btn btn-primary">+ Ajouter un article</a>
 </div>
 
 <div class="card">
