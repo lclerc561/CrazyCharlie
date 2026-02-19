@@ -3,7 +3,6 @@
 
 # Dépendances
 node_modules/
-package-lock.json
 
 # Fichiers temporaires éditeurs
 *.swp
