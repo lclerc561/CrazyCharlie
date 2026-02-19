@@ -42,11 +42,34 @@ switch ($path) {
         break;
 
     // --- Back-office (Admin) --- 
-    case '/admin/catalogue':
+case '/admin/catalogue':
 
     $db = Database::getConnection();
 
-    // Colonnes autorisées pour le tri
+// --- FILTRES ---
+$categorieFilter = $_GET['categorie'] ?? null;
+$ageFilter = $_GET['age'] ?? null;
+
+$where = [];
+$params = [];
+
+if ($categorieFilter) {
+    $where[] = "c.libelle = :categorie";
+    $params['categorie'] = $categorieFilter;
+}
+
+if ($ageFilter) {
+    $where[] = "a.age = :age";
+    $params['age'] = $ageFilter;
+}
+
+$whereSQL = "";
+if (!empty($where)) {
+    $whereSQL = " WHERE " . implode(" AND ", $where);
+}
+
+
+    // --- TRI ---
     $allowedSort = [
         'categorie' => 'c.libelle',
         'age'       => 'a.age',
@@ -55,15 +78,11 @@ switch ($path) {
         'poids'     => 'a.poids'
     ];
 
-    // Colonne demandée
     $sort = $_GET['sort'] ?? null;
     $order = $_GET['order'] ?? 'ASC';
-
-    // Sécurisation du sens du tri
     $order = strtoupper($order) === 'DESC' ? 'DESC' : 'ASC';
 
-    // Construction du ORDER BY sécurisé
-    $orderBy = '';
+    $orderBy = "";
     if ($sort && isset($allowedSort[$sort])) {
         $orderBy = " ORDER BY " . $allowedSort[$sort] . " $order";
     }
@@ -73,31 +92,24 @@ switch ($path) {
                a.age, a.etat, a.prix, a.poids 
         FROM articles a 
         LEFT JOIN categorie c ON a.categorie = c.id
+        $whereSQL
         $orderBy
     ";
 
-    $stmt = $db->query($sql);
+    $stmt = $db->prepare($sql);
+    $stmt->execute($params);
     $articles = $stmt->fetchAll();
 
     renderView('admin/catalogue', [
         'title' => 'Catalogue des articles',
         'articles' => $articles,
+        'currentCategorie' => $categorieFilter,
+        'currentAge' => $ageFilter,
         'currentSort' => $sort,
         'currentOrder' => $order
     ]);
-    break;
 
-    case '/admin/article/ajouter':
-        // Si l'admin valide l'ajout d'un article
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            require_once __DIR__ . '/../src/Controllers/ArticleController.php';
-            $controller = new ArticleController();
-            $controller->ajouter();
-            break;
-        } else {
-            renderView('admin/ajout-article', ['title' => 'Ajouter un don']);
-        }
-        break;
+    break;
 
     case '/admin/campagne':
         $db = Database::getConnection();
