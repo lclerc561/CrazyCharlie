@@ -102,9 +102,11 @@ $queryParams = $_GET ?? [];
                             <td><?= htmlspecialchars($art['prix']) ?> €</td>
                             <td><?= htmlspecialchars($art['poids']) ?> g</td>
                             <td>
-                                <button class="btn btn-sm btn-outline-secondary" disabled>
-                                    Modifier
-                                </button>
+                                <a href="/admin/article/modifier?id=<?= $art['id'] ?>" 
+                                    class="btn btn-sm btn-outline-secondary">
+                                        Modifier
+                                </a>
+
                             </td>
                         </tr>
                         <?php endforeach; ?>

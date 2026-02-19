@@ -111,6 +111,23 @@ switch ($path) {
 
         break;
 
+    case '/admin/article/ajouter':
+        $articleController = new ArticleController();
+        $articleController->ajouter();
+        break;
+    
+    case '/admin/article/modifier':
+        $articleController = new ArticleController();
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $articleController->modifier();
+        } else {
+            $articleController->modifier();
+        }
+        break;
+
+
+
     case '/admin/campagne':
         $db = Database::getConnection();
         // On récupère les box enregistrées en liant abonnés, contenus et articles
