@@ -10,6 +10,10 @@ import com.toysacademy.io.CSVManager;
 import com.toysacademy.model.Composition;
 import com.toysacademy.service.EvaluateurScoreGlouton;
 import com.toysacademy.service.ModeleGlouton;
+import com.toysacademy.service.ModeleGloutonDescente;
+import com.toysacademy.service.ModeleRecuitSimule;
+import com.toysacademy.service.ModeleBinPacking;
+import com.toysacademy.service.ModeleGenetique;
 import com.toysacademy.service.Algo;
 
 import java.io.*;
@@ -22,7 +26,11 @@ public class ServerHTTP {
 
     // Vous pouvez en ajouter d'autres plus tard (Recuit, etc.)
     private static final Algo[] MODELES = {
-            new ModeleGlouton()
+            new ModeleGlouton(),
+            new ModeleGloutonDescente(),
+            new ModeleRecuitSimule(),
+            new ModeleBinPacking(),
+            new ModeleGenetique()
     };
 
     public static void main(String[] args) throws Exception {
@@ -82,7 +90,8 @@ public class ServerHTTP {
         // Votre AnalyseurFichier lit un chemin => on écrit un fichier temporaire
         Path tmpDir = Files.createTempDirectory("toyboxing_");
         Path tmpFile = tmpDir.resolve("input_" + UUID.randomUUID() + ".csv");
-        Files.writeString(tmpFile, inputCsv, StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+        Files.writeString(tmpFile, inputCsv, StandardCharsets.UTF_8, StandardOpenOption.CREATE,
+                StandardOpenOption.TRUNCATE_EXISTING);
 
         try {
             // 1) Parse
@@ -99,11 +108,10 @@ public class ServerHTTP {
                         donnees.articles,
                         donnees.poidsMax,
                         donnees.prixMin,
-                        donnees.prixMax
-                );
+                        donnees.prixMax);
 
                 EvaluateurScoreGlouton eval = new EvaluateurScoreGlouton();
-                double score = eval.evaluer(solution, donnees.poidsMax);
+                double score = eval.evaluer(solution, donnees.poidsMax, donnees.prixMin, donnees.prixMax);
 
                 if (score > meilleurScore) {
                     meilleurScore = score;
@@ -137,8 +145,14 @@ public class ServerHTTP {
             sendText(exchange, 500, "Erreur traitement: " + e.getMessage());
         } finally {
             // Nettoyage fichiers temporaires
-            try { Files.deleteIfExists(tmpFile); } catch (Exception ignored) {}
-            try { Files.deleteIfExists(tmpDir); } catch (Exception ignored) {}
+            try {
+                Files.deleteIfExists(tmpFile);
+            } catch (Exception ignored) {
+            }
+            try {
+                Files.deleteIfExists(tmpDir);
+            } catch (Exception ignored) {
+            }
         }
     }
 
