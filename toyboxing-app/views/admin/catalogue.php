@@ -131,34 +131,3 @@ $queryParams = $_GET ?? [];
 
     </div>
 </div>
-
-
-<script>
-  const csvInputText = `articles
-a1;Uno Junior;SOC;PE;N;5;200
-a2;Poupée Clara;FIG;PE;TB;7;350
-
-abonnes
-s1;Emma;PE;SOC,FIG,EVL,CON,LIV,EXT
-s2;Lucas;EN;EXT,CON,EVL,SOC,FIG,LIV
-
-parametres
-1500
-
-`;
-
-  fetch("http://localhost:8080/solve", {
-    method: "POST",
-    headers: { "Content-Type": "text/plain; charset=utf-8" },
-    body: csvInputText
-  })
-    .then(resp => resp.text().then(text => {
-      if (!resp.ok) throw new Error(text);
-      return text;
-    }))
-    .then(csvOutput => {
-      console.log("=== CSV renvoyé ===");
-      console.log(csvOutput);
-    })
-    .catch(err => console.error("Erreur solve:", err.message || err));
-</script>
