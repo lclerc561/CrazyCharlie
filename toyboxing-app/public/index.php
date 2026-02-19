@@ -43,18 +43,49 @@ switch ($path) {
 
     // --- Back-office (Admin) --- 
     case '/admin/catalogue':
-        $db = Database::getConnection();
-        // On fait une jointure pour récupérer le libellé de la catégorie (ex: SOC) au lieu de l'ID (ex: 1)
-        $stmt = $db->query("SELECT a.id, a.libelle, c.libelle as categorie_nom, a.age, a.etat, a.prix, a.poids 
-                            FROM articles a 
-                            LEFT JOIN categorie c ON a.categorie = c.id");
-        $articles = $stmt->fetchAll();
-        
-        renderView('admin/catalogue', [
-            'title' => 'Catalogue des articles',
-            'articles' => $articles // On passe la variable à la vue
-        ]);
-        break;
+
+    $db = Database::getConnection();
+
+    // Colonnes autorisées pour le tri
+    $allowedSort = [
+        'categorie' => 'c.libelle',
+        'age'       => 'a.age',
+        'etat'      => 'a.etat',
+        'prix'      => 'a.prix',
+        'poids'     => 'a.poids'
+    ];
+
+    // Colonne demandée
+    $sort = $_GET['sort'] ?? null;
+    $order = $_GET['order'] ?? 'ASC';
+
+    // Sécurisation du sens du tri
+    $order = strtoupper($order) === 'DESC' ? 'DESC' : 'ASC';
+
+    // Construction du ORDER BY sécurisé
+    $orderBy = '';
+    if ($sort && isset($allowedSort[$sort])) {
+        $orderBy = " ORDER BY " . $allowedSort[$sort] . " $order";
+    }
+
+    $sql = "
+        SELECT a.id, a.libelle, c.libelle as categorie_nom, 
+               a.age, a.etat, a.prix, a.poids 
+        FROM articles a 
+        LEFT JOIN categorie c ON a.categorie = c.id
+        $orderBy
+    ";
+
+    $stmt = $db->query($sql);
+    $articles = $stmt->fetchAll();
+
+    renderView('admin/catalogue', [
+        'title' => 'Catalogue des articles',
+        'articles' => $articles,
+        'currentSort' => $sort,
+        'currentOrder' => $order
+    ]);
+    break;
 
     case '/admin/article/ajouter':
         // Si l'admin valide l'ajout d'un article

@@ -11,12 +11,12 @@
                     <tr>
                         <th>ID</th>
                         <th>Désignation</th>
-                        <th>Catégorie</th>
-                        <th>Âge</th>
-                        <th>État</th>
-                        <th>Prix</th>
-                        <th>Poids</th>
-                        <th>Action</th>
+                        <th><a href="?sort=categorie&order=<?= ($currentSort === 'categorie' && $currentOrder === 'ASC') ? 'DESC' : 'ASC' ?>">Catégorie</a></th>
+                        <th><a href="?sort=age&order=<?= ($currentSort === 'age' && $currentOrder === 'ASC') ? 'DESC' : 'ASC' ?>">Âge</a></th>
+                        <th><a href="?sort=etat&order=<?= ($currentSort === 'etat' && $currentOrder === 'ASC') ? 'DESC' : 'ASC' ?>">État</a></th>
+                        <th><a href="?sort=prix&order=<?= ($currentSort === 'prix' && $currentOrder === 'ASC') ? 'DESC' : 'ASC' ?>">Prix</a></th>
+                        <th><a href="?sort=poids&order=<?= ($currentSort === 'poids' && $currentOrder === 'ASC') ? 'DESC' : 'ASC' ?>">Poids</a></th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
