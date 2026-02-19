@@ -9,7 +9,10 @@ $queryParams = $_GET ?? [];
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2>Catalogue des articles</h2>
-    <a href="/admin/article/ajouter" class="btn btn-primary">+ Ajouter un article</a>
+    <div>
+        <a href="/admin/campagne" class="btn btn-warning fw-bold text-dark me-2">🚀 Gérer la Campagne</a>
+        <a href="/admin/article/ajouter" class="btn btn-primary">+ Ajouter un article</a>
+    </div>
 </div>
 
 <div class="card">
