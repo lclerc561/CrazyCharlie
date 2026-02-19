@@ -1,17 +1,19 @@
-# Dépôt du projet de l'équipe xxx #
+# Dépôt du projet de l'équipe L'EQU1P3 #
 
 <!-- Supprimez les exemples dont vous n'avez pas besoin, gardez la -->
 <!-- structure générale du document et répondez aux questions posées -->
 
 ## Liste des membres ##
 
- - nom / prénom / groupe
- - nom / prénom / groupe
- - nom / prénom / groupe
+ - MARTINEZ VILLORIA / Oscar / IL-1
+ - KHODJAOUI / Elias / IL-1
+ - HARY/ Alexandre / DACS
+ - CLERC/ Léo / DWM-2
+ - SORET / Mathias / DWM-2
 
 ## URL ##
 
-- des dépôts git
+- https://github.com/lclerc561/CrazyCharlie
 - de l'application finale
 
 ##  Partie application Web##
