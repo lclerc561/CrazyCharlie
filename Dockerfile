@@ -1,16 +1,16 @@
-FROM node:20-slim
+FROM php:8.2-apache
 
-WORKDIR /app
+RUN docker-php-ext-install pdo pdo_mysql mysqli
+RUN a2enmod rewrite
 
-# Copie des fichiers de dépendances
-COPY package*.json ./
+# On change la racine d'Apache vers le dossier public
+ENV APACHE_DOCUMENT_ROOT /var/www/html/public
+RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
+RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
 
-# Installation (npm ci est plus propre pour Docker)
-RUN npm ci
+WORKDIR /var/www/html
 
-# Copie du reste du code
-COPY . .
+# On copie UNIQUEMENT le contenu de toyboxing-app vers /var/www/html
+COPY toyboxing-app/ .
 
-EXPOSE 3000
-
-CMD ["npm", "start"]
+RUN chown -R www-data:www-data /var/www/html

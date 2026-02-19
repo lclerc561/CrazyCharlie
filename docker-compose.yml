@@ -1,35 +1,29 @@
 services:
-  # L'app Node.js (Express)
-  web-js:
+  # L'app PHP
+  web-app:
     build: .
     ports:
-      - "3000:3000"
-    volumes:
-      - .:/app
-      - /app/node_modules
+      - "9000:80" # Port standard HTTP
     depends_on:
       - db
 
-  # La Base de Données (MariaDB)
+  # Ta BDD MariaDB (Rien ne change, c'est nickel)
   db:
     image: mariadb:10.11
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: toyboxing
-      MYSQL_USER: user
-      MYSQL_PASSWORD: password
-    ports:
-      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
 
-  # L'interface PHPMyAdmin
+  # Ton interface de gestion
   phpmyadmin:
     image: phpmyadmin:latest
-    restart: always
     ports:
-      - "8080:80"
+      - "8888:80"
     environment:
       - PMA_HOST=db
-      - ARBITRARY_SERVER_CONNECTION=1
-    depends_on:
-      - db
+
+volumes:
+  db_data:
