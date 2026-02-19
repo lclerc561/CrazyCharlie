@@ -113,7 +113,12 @@ switch ($path) {
 
     case '/admin/article/ajouter':
         $articleController = new ArticleController();
-        $articleController->ajouter();
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $articleController->ajouter();
+        } else {
+            $articleController->ajouter();
+        }
         break;
     
     case '/admin/article/modifier':
@@ -126,7 +131,16 @@ switch ($path) {
         }
         break;
 
+    case '/admin/article/supprimer':
+        $articleController = new ArticleController();
 
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $articleController->supprimer();
+        } else {
+            $articleController->supprimer();
+        }
+        break;
+        break;
 
     case '/admin/campagne':
         $db = Database::getConnection();
