@@ -1,8 +1,8 @@
 <?php
 require_once __DIR__ . '/../src/Database.php';
-require_once __DIR__ . '/../src/Controllers/AbonneController.php';
-require_once __DIR__ . '/../src/Controllers/ArticleController.php';
-require_once __DIR__ . '/../src/Controllers/AdminController.php';
+require_once __DIR__ . '/../src/controllers/AbonneController.php';
+require_once __DIR__ . '/../src/controllers/ArticleController.php';
+require_once __DIR__ . '/../src/controllers/AdminController.php';
 // 1. On récupère l'URL demandée (ex: /admin/catalogue)
 $request = $_SERVER['REQUEST_URI'];
 $path = parse_url($request, PHP_URL_PATH);
