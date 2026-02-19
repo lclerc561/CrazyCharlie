@@ -3,45 +3,44 @@ require_once __DIR__ . '/../Database.php';
 
 class AdminController {
     
-    // 1. Afficher l'historique des box déjà validées
     public function showCampagne() {
         $db = Database::getConnection();
         
         $stmt = $db->query("
-            SELECT a.prenom as abonne_nom, art.id, art.libelle, c.libelle as categorie_nom, art.age, art.etat, art.prix, art.poids
+            SELECT bl.nom as box_nom, a.prenom as abonne_nom, art.id, art.libelle, c.libelle as categorie_nom, art.age, art.etat, art.prix, art.poids
             FROM box_lien bl
             JOIN abonnes a ON bl.id_abo = a.id
             JOIN box_contenu bc ON bl.id_contenu = bc.id
             JOIN articles art ON bc.id_article = art.id
             LEFT JOIN categorie c ON art.categorie = c.id
+            ORDER BY bl.id DESC
         ");
         $lignes = $stmt->fetchAll();
         
         $boxes = [];
         foreach ($lignes as $ligne) {
-            $abonne = $ligne['abonne_nom'];
-            if (!isset($boxes[$abonne])) {
-                $boxes[$abonne] = ['articles' => [], 'poids_total' => 0, 'prix_total' => 0];
+            $boxKey = $ligne['box_nom'];
+            if (!isset($boxes[$boxKey])) {
+                $boxes[$boxKey] = ['articles' => [], 'poids_total' => 0, 'prix_total' => 0];
             }
-            $boxes[$abonne]['articles'][] = $ligne;
-            $boxes[$abonne]['poids_total'] += $ligne['poids'];
-            $boxes[$abonne]['prix_total'] += $ligne['prix'];
+            $boxes[$boxKey]['articles'][] = $ligne;
+            $boxes[$boxKey]['poids_total'] += $ligne['poids'];
+            $boxes[$boxKey]['prix_total'] += $ligne['prix'];
         }
 
         renderView('admin/campagne', [
-            'title' => 'Campagne de Box',
+            'title' => 'Historique des Campagnes',
             'boxes' => $boxes,
-            'scoreTotal' => 0 
+            'scoreTotal' => 0,
+            'isHistory' => true
         ]);
     }
 
-    // 2. Lancer l'algorithme Java (Celle qui avait disparu !)
     public function lancerCampagne() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $poids_max = $_POST['poids_max'] ?? 1200;
             $db = Database::getConnection();
 
-            // Récupération avec jointure pour avoir le nom de la catégorie (SOC, FIG...) attendu par Java
             $stmtArt = $db->query("SELECT a.id, a.libelle, c.libelle as cat, a.age, a.etat, a.prix, a.poids FROM articles a LEFT JOIN categorie c ON a.categorie = c.id");
             $articles = $stmtArt->fetchAll();
 
@@ -64,7 +63,6 @@ class AdminController {
 
             $csv .= "\nparametres\n{$poids_max}\n";
 
-            // Appel au serveur Java 8080
             $options = [
                 'http' => [
                     'header'  => "Content-Type: text/plain; charset=utf-8\r\n",
@@ -99,6 +97,7 @@ class AdminController {
                         $fullArt = $artIndex[$idArtCsv];
                         $boxes[$prenom]['articles'][] = [
                             'id' => $fullArt['id'],
+                            'libelle' => $fullArt['libelle'],
                             'categorie_nom' => $fullArt['cat'],
                             'age' => $fullArt['age'],
                             'etat' => $etat,
@@ -114,16 +113,16 @@ class AdminController {
             renderView('admin/campagne', [
                 'title' => 'Campagne de Box',
                 'boxes' => $boxes,
-                'scoreTotal' => $scoreTotal
+                'scoreTotal' => $scoreTotal,
+                'isHistory' => false
             ]);
         }
     }
 
-    // 3. Sauvegarder la box validée
     public function validerBox() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $abonneNom = $_POST['abonne'] ?? '';
-            $articlesIds = $_POST['articles'] ?? []; // On récupère les ID des articles cachés dans le formulaire
+            $articlesIds = $_POST['articles'] ?? [];
             $db = Database::getConnection();
 
             if ($abonneNom && !empty($articlesIds)) {
@@ -133,15 +132,13 @@ class AdminController {
 
                 if ($abo) {
                     $idAbo = $abo['id'];
-                    $nomBox = "Box de " . $abonneNom . " - " . date('Y-m-d');
+                    $nomBox = "Box de " . $abonneNom . " - " . date('Y-m-d H:i:s');
 
                     foreach ($articlesIds as $idArt) {
-                        // On insère l'article dans la box
                         $stmtBc = $db->prepare("INSERT INTO box_contenu (id_article) VALUES (:id_article)");
                         $stmtBc->execute(['id_article' => $idArt]);
                         $idContenu = $db->lastInsertId();
 
-                        // On lie le tout à l'abonné
                         $stmtBl = $db->prepare("INSERT INTO box_lien (nom, id_abo, id_contenu, date) VALUES (:nom, :id_abo, :id_contenu, :date)");
                         $stmtBl->execute([
                             'nom' => $nomBox,
@@ -152,8 +149,9 @@ class AdminController {
                     }
                 }
             }
-            // On redirige vers l'historique
-            header('Location: /admin/campagne');
+            
+            header('Content-Type: application/json');
+            echo json_encode(['success' => true]);
             exit;
         }
     }

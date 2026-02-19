@@ -19,8 +19,6 @@ class AbonneController
             $preferencesStr = implode(',', $preferencesArray);
 
             if ($prenom && $nom && $email && $tranche_age) {
-                
-                // NOUVEAU : On vérifie si l'email existe déjà dans la base
                 $stmtCheck = $db->prepare("SELECT id FROM abonnes WHERE email = :email");
                 $stmtCheck->execute([':email' => $email]);
                 
@@ -89,7 +87,6 @@ class AbonneController
     // --- 3. LA DÉCONNEXION ---
     public function deconnexion()
     {
-        // On détruit le cookie en lui donnant une date d'expiration dans le passé
         setcookie('abonne_email', '', time() - 3600, "/");
         header('Location: /');
         exit;

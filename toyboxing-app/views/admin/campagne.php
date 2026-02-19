@@ -1,5 +1,6 @@
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2>🚀 Lancement de la Campagne</h2>
+    <a href="/admin/catalogue" class="btn btn-outline-secondary">Retour au catalogue</a>
 </div>
 
 <div class="row">
@@ -17,28 +18,46 @@
     </div>
 
     <div class="col-12 col-lg-8">
-        <h5 class="mb-3">Résultats de l'algorithme</h5>
         
-        <div class="alert alert-success fw-bold">
-            Score global de la composition : <?= htmlspecialchars($scoreTotal ?? 0) ?> points
-        </div>
+        <h5 class="mb-3">
+            <?= (isset($isHistory) && $isHistory) ? 'Historique des expéditions' : 'Résultats de l\'algorithme' ?>
+        </h5>
+        
+        <?php if (!isset($isHistory) || !$isHistory): ?>
+            <div class="alert alert-success fw-bold">
+                Score global de la composition : <?= htmlspecialchars($scoreTotal ?? 0) ?> points
+            </div>
+        <?php endif; ?>
 
         <?php if (!empty($boxes)): ?>
-            <?php foreach ($boxes as $abonne => $box): ?>
-                <div class="card mb-3">
+            <?php foreach ($boxes as $boxKey => $box): ?>
+                
+                <div class="card mb-3 shadow-sm border-0">
                     <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0 text-primary">Box de <?= htmlspecialchars($abonne) ?></h5>
-                        <form action="/admin/box/valider" method="POST" class="m-0">
-                            <input type="hidden" name="abonne" value="<?= htmlspecialchars($abonne) ?>">
-                            <button type="submit" class="btn btn-sm btn-success">Valider cette box</button>
-                        </form>
+                        <h5 class="mb-0 text-primary">
+                            <?= (isset($isHistory) && $isHistory) ? htmlspecialchars($boxKey) : "Nouvelle Box de " . htmlspecialchars($boxKey) ?>
+                        </h5>
+                        
+                        <?php if (isset($isHistory) && $isHistory): ?>
+                            <span class="badge bg-secondary">Déjà validée</span>
+                        <?php else: ?>
+                            <form action="/admin/box/valider" method="POST" class="m-0 form-valider-box">
+                                <input type="hidden" name="abonne" value="<?= htmlspecialchars($boxKey) ?>">
+                                <?php foreach ($box['articles'] as $art): ?>
+                                    <input type="hidden" name="articles[]" value="<?= htmlspecialchars($art['id']) ?>">
+                                <?php endforeach; ?>
+                                <button type="submit" class="btn btn-sm btn-success btn-valider">Valider cette box</button>
+                            </form>
+                        <?php endif; ?>
                     </div>
+                    
                     <div class="card-body p-0">
                         <div class="table-responsive">
                             <table class="table table-sm table-hover align-middle mb-0">
                                 <thead class="table-light">
                                     <tr>
-                                        <th>ID</th>
+                                        <th class="ps-3">ID</th>
+                                        <th>Jouet</th>
                                         <th>Catégorie</th>
                                         <th>Âge</th>
                                         <th>État</th>
@@ -47,7 +66,8 @@
                                 <tbody>
                                     <?php foreach ($box['articles'] as $art): ?>
                                     <tr>
-                                        <td class="text-muted">#<?= htmlspecialchars($art['id']) ?></td>
+                                        <td class="text-muted ps-3">#<?= htmlspecialchars($art['id']) ?></td>
+                                        <td class="fw-bold"><?= htmlspecialchars($art['libelle'] ?? 'Article') ?></td>
                                         <td><span class="badge bg-info text-dark"><?= htmlspecialchars($art['categorie_nom'] ?? 'N/A') ?></span></td>
                                         <td><span class="badge bg-secondary"><?= htmlspecialchars($art['age']) ?></span></td>
                                         <td><?= htmlspecialchars($art['etat'] ?? 'Non précisé') ?></td>
@@ -69,3 +89,31 @@
 
     </div>
 </div>
+
+<script>
+document.querySelectorAll('.form-valider-box').forEach(form => {
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const btn = this.querySelector('.btn-valider');
+        btn.innerHTML = '⏳ Validation...';
+        btn.disabled = true;
+
+        fetch(this.action, {
+            method: 'POST',
+            body: new FormData(this)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if(data.success) {
+                this.outerHTML = '<span class="badge bg-secondary">Déjà validée</span>';
+            }
+        })
+        .catch(error => {
+            alert('Erreur lors de la sauvegarde.');
+            btn.innerHTML = 'Valider cette box';
+            btn.disabled = false;
+        });
+    });
+});
+</script>
