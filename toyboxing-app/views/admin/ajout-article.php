@@ -19,12 +19,12 @@
                         <label for="categorie" class="form-label fw-bold">Catégorie</label>
                         <select class="form-select" id="categorie" name="categorie" required>
                             <option value="">Sélectionner...</option>
-                            <option value="SOC">Jeux de société (SOC)</option>
-                            <option value="FIG">Figurines et poupées (FIG)</option>
-                            <option value="CON">Jeux de construction (CON)</option>
-                            <option value="EXT">Jeux d'extérieur (EXT)</option>
-                            <option value="EVL">Jeux d'éveil et éducatifs (EVL)</option>
-                            <option value="LIV">Livres jeunesse (LIV)</option>
+                            <option value="1">Jeux de société (SOC)</option>
+                            <option value="2">Figurines et poupées (FIG)</option>
+                            <option value="3">Jeux de construction (CON)</option>
+                            <option value="4">Jeux d'extérieur (EXT)</option>
+                            <option value="5">Jeux d'éveil et éducatifs (EVL)</option>
+                            <option value="6">Livres jeunesse (LIV)</option>
                         </select>
                     </div>
                     

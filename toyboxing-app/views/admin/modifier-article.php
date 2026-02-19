@@ -13,12 +13,12 @@
     <div class="mb-3">
         <label class="form-label">Catégorie</label>
         <select name="categorie" class="form-select" required>
-            <option value="SOC" <?= $article['categorie'] === 'SOC' ? 'selected' : '' ?>>SOC</option>
-            <option value="FIG" <?= $article['categorie'] === 'FIG' ? 'selected' : '' ?>>FIG</option>
-            <option value="CON" <?= $article['categorie'] === 'CON' ? 'selected' : '' ?>>CON</option>
-            <option value="EXT" <?= $article['categorie'] === 'EXT' ? 'selected' : '' ?>>EXT</option>
-            <option value="EVL" <?= $article['categorie'] === 'EVL' ? 'selected' : '' ?>>EVL</option>
-            <option value="LIV" <?= $article['categorie'] === 'LIV' ? 'selected' : '' ?>>LIV</option>
+            <option value="1" <?= $article['categorie'] === 'SOC' ? 'selected' : '' ?>>SOC</option>
+            <option value="2" <?= $article['categorie'] === 'FIG' ? 'selected' : '' ?>>FIG</option>
+            <option value="3" <?= $article['categorie'] === 'CON' ? 'selected' : '' ?>>CON</option>
+            <option value="4" <?= $article['categorie'] === 'EXT' ? 'selected' : '' ?>>EXT</option>
+            <option value="5" <?= $article['categorie'] === 'EVL' ? 'selected' : '' ?>>EVL</option>
+            <option value="6" <?= $article['categorie'] === 'LIV' ? 'selected' : '' ?>>LIV</option>
         </select>
     </div>
 
