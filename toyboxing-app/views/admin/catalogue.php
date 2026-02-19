@@ -20,30 +20,26 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <?php 
-                    $articlesMock = [
-                        ['id' => 'a1', 'nom' => 'Monopoly Junior', 'cat' => 'SOC', 'age' => 'PE', 'etat' => 'N', 'prix' => 8, 'poids' => 400],
-                        ['id' => 'a2', 'nom' => 'Barbie Aventurière', 'cat' => 'FIG', 'age' => 'PE', 'etat' => 'TB', 'prix' => 5, 'poids' => 300],
-                        ['id' => 'a3', 'nom' => 'Puzzle éducatif', 'cat' => 'EVL', 'age' => 'PE', 'etat' => 'TB', 'prix' => 7, 'poids' => 350],
-                        ['id' => 'a6', 'nom' => 'Kapla 200 pièces', 'cat' => 'CON', 'age' => 'EN', 'etat' => 'B', 'prix' => 10, 'poids' => 600],
-                        ['id' => 'a7', 'nom' => 'Cerf-volant Pirate', 'cat' => 'EXT', 'age' => 'EN', 'etat' => 'N', 'prix' => 6, 'poids' => 400],
-                    ];
-
-                    foreach ($articlesMock as $art): 
-                    ?>
-                    <tr>
-                        <td class="text-muted fw-bold">#<?= $art['id'] ?></td>
-                        <td class="fw-bold"><?= $art['nom'] ?></td>
-                        <td><span class="badge bg-info text-dark"><?= $art['cat'] ?></span></td>
-                        <td><span class="badge bg-secondary"><?= $art['age'] ?></span></td>
-                        <td><?= $art['etat'] ?></td>
-                        <td><?= $art['prix'] ?> €</td>
-                        <td><?= $art['poids'] ?> g</td>
-                        <td>
-                            <button class="btn btn-sm btn-outline-secondary" disabled>Modifier</button>
-                        </td>
-                    </tr>
-                    <?php endforeach; ?>
+                    <?php if (!empty($articles)): ?>
+                        <?php foreach ($articles as $art): ?>
+                        <tr>
+                            <td class="text-muted fw-bold">#<?= htmlspecialchars($art['id']) ?></td>
+                            <td class="fw-bold"><?= htmlspecialchars($art['libelle']) ?></td>
+                            <td><span class="badge bg-info text-dark"><?= htmlspecialchars($art['categorie_nom'] ?? 'N/A') ?></span></td>
+                            <td><span class="badge bg-secondary"><?= htmlspecialchars($art['age']) ?></span></td>
+                            <td><?= htmlspecialchars($art['etat'] ?? 'Non précisé') ?></td>
+                            <td><?= htmlspecialchars($art['prix']) ?> €</td>
+                            <td><?= htmlspecialchars($art['poids']) ?> g</td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-secondary" disabled>Modifier</button>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <tr>
+                            <td colspan="8" class="text-center py-4 text-muted">Aucun article dans la base de données.</td>
+                        </tr>
+                    <?php endif; ?>
                 </tbody>
             </table>
         </div>
