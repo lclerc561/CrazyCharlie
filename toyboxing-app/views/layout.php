@@ -92,12 +92,19 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto align-items-center">
-                    <li class="nav-item"><a class="nav-link" href="/">S'inscrire</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/ma-box">Ma Box</a></li>
+                    <?php if (isset($_COOKIE['abonne_email'])): ?>
+                        <li class="nav-item"><a class="nav-link" href="/ma-box">Ma Box</a></li>
+                        <li class="nav-item"><a class="nav-link text-danger" href="/deconnexion">Se déconnecter</a></li>
+                    <?php else: ?>
+                        <li class="nav-item"><a class="nav-link" href="/">S'inscrire</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/connexion">Se connecter</a></li>
+                    <?php endif; ?>
+                    
                     <li class="nav-item ms-lg-3 mt-2 mt-lg-0">
                         <a class="nav-link admin-link fw-bold" href="/admin/catalogue">⚙️ Back-office</a>
                     </li>
                 </ul>
+                
             </div>
         </div>
     </nav>

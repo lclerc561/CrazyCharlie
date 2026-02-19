@@ -1,5 +1,8 @@
 <?php
 require_once __DIR__ . '/../src/Database.php';
+require_once __DIR__ . '/../src/Controllers/AbonneController.php';
+require_once __DIR__ . '/../src/Controllers/ArticleController.php';
+require_once __DIR__ . '/../src/Controllers/AdminController.php';
 // 1. On récupère l'URL demandée (ex: /admin/catalogue)
 $request = $_SERVER['REQUEST_URI'];
 $path = parse_url($request, PHP_URL_PATH);
@@ -28,66 +31,63 @@ switch ($path) {
     // --- Front-office (Abonnés) ---
     case '/':
     case '':
-        // Si l'abonné valide le formulaire
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            // TODO: Relier à la base de données et créer le cookie
-            die("Traitement de l'inscription en cours... (À coder)");
-        } else {
-            renderView('abonnes/inscription', ['title' => 'Inscription - ToyBox']);
-        }
+    case '/inscription':
+        $abonneController = new AbonneController();
+        $abonneController->inscription();
         break;
 
     case '/ma-box':
-        renderView('abonnes/ma-box', ['title' => 'Consulter ma Box']);
+        $abonneController = new AbonneController();
+        $abonneController->maBox();
         break;
 
     // --- Back-office (Admin) --- 
-case '/admin/catalogue':
+    case '/admin/catalogue':
 
-    $db = Database::getConnection();
+        $db = Database::getConnection();
 
-// --- FILTRES ---
-$categorieFilter = $_GET['categorie'] ?? null;
-$ageFilter = $_GET['age'] ?? null;
+        // --- FILTRES ---
+        $categorieFilter = $_GET['categorie'] ?? null;
+        $ageFilter = $_GET['age'] ?? null;
 
-$where = [];
-$params = [];
+        $where = [];
+        $params = [];
 
-if ($categorieFilter) {
-    $where[] = "c.libelle = :categorie";
-    $params['categorie'] = $categorieFilter;
-}
+        if ($categorieFilter) {
+            $where[] = "c.libelle = :categorie";
+            $params['categorie'] = $categorieFilter;
+        }
 
-if ($ageFilter) {
-    $where[] = "a.age = :age";
-    $params['age'] = $ageFilter;
-}
+        if ($ageFilter) {
+            $where[] = "a.age = :age";
+            $params['age'] = $ageFilter;
+        }
 
-$whereSQL = "";
-if (!empty($where)) {
-    $whereSQL = " WHERE " . implode(" AND ", $where);
-}
+        $whereSQL = "";
+        if (!empty($where)) {
+            $whereSQL = " WHERE " . implode(" AND ", $where);
+        }
 
 
-    // --- TRI ---
-    $allowedSort = [
-        'categorie' => 'c.libelle',
-        'age'       => 'a.age',
-        'etat'      => 'a.etat',
-        'prix'      => 'a.prix',
-        'poids'     => 'a.poids'
-    ];
+        // --- TRI ---
+        $allowedSort = [
+            'categorie' => 'c.libelle',
+            'age' => 'a.age',
+            'etat' => 'a.etat',
+            'prix' => 'a.prix',
+            'poids' => 'a.poids'
+        ];
 
-    $sort = $_GET['sort'] ?? null;
-    $order = $_GET['order'] ?? 'ASC';
-    $order = strtoupper($order) === 'DESC' ? 'DESC' : 'ASC';
+        $sort = $_GET['sort'] ?? null;
+        $order = $_GET['order'] ?? 'ASC';
+        $order = strtoupper($order) === 'DESC' ? 'DESC' : 'ASC';
 
-    $orderBy = "";
-    if ($sort && isset($allowedSort[$sort])) {
-        $orderBy = " ORDER BY " . $allowedSort[$sort] . " $order";
-    }
+        $orderBy = "";
+        if ($sort && isset($allowedSort[$sort])) {
+            $orderBy = " ORDER BY " . $allowedSort[$sort] . " $order";
+        }
 
-    $sql = "
+        $sql = "
         SELECT a.id, a.libelle, c.libelle as categorie_nom, 
                a.age, a.etat, a.prix, a.poids 
         FROM articles a 
@@ -96,20 +96,20 @@ if (!empty($where)) {
         $orderBy
     ";
 
-    $stmt = $db->prepare($sql);
-    $stmt->execute($params);
-    $articles = $stmt->fetchAll();
+        $stmt = $db->prepare($sql);
+        $stmt->execute($params);
+        $articles = $stmt->fetchAll();
 
-    renderView('admin/catalogue', [
-        'title' => 'Catalogue des articles',
-        'articles' => $articles,
-        'currentCategorie' => $categorieFilter,
-        'currentAge' => $ageFilter,
-        'currentSort' => $sort,
-        'currentOrder' => $order
-    ]);
+        renderView('admin/catalogue', [
+            'title' => 'Catalogue des articles',
+            'articles' => $articles,
+            'currentCategorie' => $categorieFilter,
+            'currentAge' => $ageFilter,
+            'currentSort' => $sort,
+            'currentOrder' => $order
+        ]);
 
-    break;
+        break;
 
     case '/admin/campagne':
         $db = Database::getConnection();
@@ -123,7 +123,7 @@ if (!empty($where)) {
             LEFT JOIN categorie c ON art.categorie = c.id
         ");
         $lignes = $stmt->fetchAll();
-        
+
         $boxes = [];
         // On regroupe les articles par prénom d'abonné
         foreach ($lignes as $ligne) {
@@ -139,13 +139,22 @@ if (!empty($where)) {
         renderView('admin/campagne', [
             'title' => 'Campagne de Box',
             'boxes' => $boxes,
-            'scoreTotal' => 0 // Pour l'instant on met 0, l'algo le calculera plus tard
+            'scoreTotal' => 0
         ]);
         break;
 
-    // --- Erreur 404 ---
-    default:
-        http_response_code(404);
-        renderView('404', ['title' => 'Page introuvable']);
+    case '/admin/article/ajouter':
+        $articleController = new ArticleController();
+        $articleController->ajouter();
+        break;
+        
+    case '/connexion':
+        $abonneController = new AbonneController();
+        $abonneController->connexion();
+        break;
+
+    case '/deconnexion':
+        $abonneController = new AbonneController();
+        $abonneController->deconnexion();
         break;
 }

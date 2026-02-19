@@ -5,6 +5,11 @@
                 <h2 class="card-title text-center text-primary mb-4">Demander ma Toy Box</h2>
                 <p class="text-muted text-center mb-4">Inscrivez-vous pour recevoir une box de jouets reconditionnés adaptée à votre enfant.</p>
 
+                <?php if (!empty($error)): ?>
+                    <div class="alert alert-danger fw-bold text-center">
+                        ⚠️ <?= htmlspecialchars($error) ?>
+                    </div>
+                <?php endif; ?>
                 <form action="/inscription" method="POST">
                     
                     <h5 class="mb-3 border-bottom pb-2">Vos informations</h5>
