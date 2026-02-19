@@ -59,10 +59,10 @@ switch ($path) {
     case '/admin/article/ajouter':
         // Si l'admin valide l'ajout d'un article
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            // TODO: Insérer l'article en base de données
-            // Pour le moment, on simule un succès en redirigeant vers le catalogue
-            header('Location: /admin/catalogue');
-            exit;
+            require_once __DIR__ . '/../src/Controllers/ArticleController.php';
+            $controller = new ArticleController();
+            $controller->ajouter();
+            break;
         } else {
             renderView('admin/ajout-article', ['title' => 'Ajouter un don']);
         }
