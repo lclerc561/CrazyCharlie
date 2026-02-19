@@ -9,7 +9,7 @@
             <form action="/admin/campagne" method="POST">
                 <div class="mb-3">
                     <label for="poids_max" class="form-label fw-bold">Poids maximum par box (g)</label>
-                    <input type="number" step="1" min="0" class="form-control" id="poids_max" name="poids_max" value="1200" required>
+                    <input type="number" step="1" min="0" class="form-control" id="poids_max" name="poids_max" value="<?= htmlspecialchars($_POST['poids_max'] ?? 1200) ?>" required>
                 </div>
                 <button type="submit" class="btn btn-primary w-100">Lancer l'optimisation</button>
             </form>
