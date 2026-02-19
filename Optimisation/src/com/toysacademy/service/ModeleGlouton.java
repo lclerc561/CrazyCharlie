@@ -17,19 +17,14 @@ public class ModeleGlouton implements Solveur {
     private final Random aleatoire = new Random(42);
 
     // Taux d'apprentissage initial (Learning Rate).
-    // Valeur élevée (100.0) pour permettre une exploration globale de l'espace des
-    // solutions au début (haute "température").
-    // Permet d'accepter des dégradations temporaires pour sortir des optimums
-    // locaux.
     private static final double TAUX_APPRENTISSAGE_INITIAL = 100.0;
-
     // Facteur d'oubli (Decay Rate).
-    // Contrôle la vitesse de réduction du taux d'apprentissage.
-    // 0.9995 = Décroissance lente pour une convergence stable.
     private static final double FACTEUR_OUBLI = 0.9995;
-
     // Nombre d'époques (Epochs) ou itérations d'optimisation.
     private static final int MAX_EPOCHS = 50_000;
+
+    private int prixMin = 0;
+    private int prixMax = Integer.MAX_VALUE;
 
     @Override
     public String getNom() {
@@ -38,18 +33,19 @@ public class ModeleGlouton implements Solveur {
 
     @Override
     public Composition resoudre(List<Abonne> abonnes, List<Article> articles,
-                                double poidsMax, int prixMin, int prixMax) {
-        // Ignorer prixMin et prixMax
+            double poidsMax, int prixMin, int prixMax) {
+        this.prixMin = prixMin;
+        this.prixMax = prixMax;
         return resoudre(abonnes, articles, poidsMax);
     }
 
     @Override
     public Composition resoudre(List<Abonne> abonnes, List<Article> articles, double poidsMax) {
-        // Pré-calculer l'index par tranche d'âge (EXACT uniquement)
+        // Pré-calculer l'index par tranche d'âge
         Map<Age, List<Article>> indexParAge = articles.stream()
                 .collect(Collectors.groupingBy(Article::getTrancheAge));
 
-        // Phase 1 : Construction gloutonne interactive (STRICT)
+        // Phase 1 : Construction gloutonne interactive
         Composition solution = gloutonInteractif(abonnes, indexParAge, articles, poidsMax);
 
         // Phase 2 : Optimisation par Descente de Gradient Stochastique (Simulé)
@@ -59,13 +55,22 @@ public class ModeleGlouton implements Solveur {
     }
 
     /**
-     * Retourne les articles compatibles pour un abonné (EXACT uniquement).
+     * Retourne les articles compatibles pour un abonné (Exact + Adjacent pour TOUS
+     * les enfants).
      */
     private List<Article> getArticlesCompatibles(Abonne abonne, Map<Age, List<Article>> indexParAge) {
         List<Article> result = new ArrayList<>();
+        // Pour chaque enfant
         for (Age ageEnfant : abonne.getTrancheAgesEnfants()) {
-            // Articles exacts uniquement
+            // 1. Articles exacts
             result.addAll(indexParAge.getOrDefault(ageEnfant, Collections.emptyList()));
+
+            // 2. Articles adjacents
+            for (Age age : Age.values()) {
+                if (age.isAdjacent(ageEnfant)) {
+                    result.addAll(indexParAge.getOrDefault(age, Collections.emptyList()));
+                }
+            }
         }
         // Dédupliquer
         return new ArrayList<>(new LinkedHashSet<>(result));
@@ -82,7 +87,7 @@ public class ModeleGlouton implements Solveur {
 
         Set<Article> disponibles = new HashSet<>(allArticles);
 
-        // Pré-calculer les articles compatibles par box (STRICT)
+        // Pré-calculer les articles compatibles par box (Exact + Adjacent)
         Map<Box, List<Article>> compatiblesParBox = new HashMap<>();
         for (Box box : composition.getBoxes()) {
             compatiblesParBox.put(box, getArticlesCompatibles(box.getAbonne(), indexParAge));
@@ -102,9 +107,8 @@ public class ModeleGlouton implements Solveur {
                     if (box.getPoidsTotal() + article.getPoids() > poidsMax)
                         continue;
 
-                    // STRICT: Vérification explicite supplémentaire
-                    if (!box.getAbonne().isArticleExact(article))
-                        continue;
+                    // Vérification de compatibilité (déjà filtré par getArticlesCompatibles,
+                    // mais double check via Abonne si besoin, ici on fait confiance à la liste)
 
                     double gain = calculerGainMarginal(article, box);
 
@@ -144,7 +148,10 @@ public class ModeleGlouton implements Solveur {
             points = EvaluateurScoreGlouton.pointsPourRang(rangEffectif);
         }
 
-        // Pas de pénalité adjacent car adjacent interdit
+        // Pénalité adjacent
+        if (abonne.isArticleAdjacentSeulement(article) && points > 0) {
+            points = Math.max(1, (int) Math.ceil(points / 2.0));
+        }
 
         return points + article.getEtat().getBonus();
     }
@@ -156,7 +163,8 @@ public class ModeleGlouton implements Solveur {
     private Composition optimisationStochastique(Composition solutionInitiale,
             List<Abonne> abonnes, double poidsMax) {
         Composition solutionActuelle = clonerComposition(solutionInitiale);
-        double scoreActuel = evaluateur.evaluer(solutionActuelle, poidsMax);
+        // Utiliser l'évaluation avec Prix
+        double scoreActuel = evaluateur.evaluer(solutionActuelle, poidsMax, prixMin, prixMax);
 
         Composition meilleureSolution = clonerComposition(solutionActuelle);
         double meilleurScore = scoreActuel;
@@ -173,7 +181,8 @@ public class ModeleGlouton implements Solveur {
             if (!mutationReussie)
                 continue;
 
-            double scoreVoisin = evaluateur.evaluer(voisin, poidsMax);
+            // Évaluation avec Prix
+            double scoreVoisin = evaluateur.evaluer(voisin, poidsMax, prixMin, prixMax);
 
             if (Double.isInfinite(scoreVoisin) && scoreVoisin < 0)
                 continue;
@@ -217,13 +226,14 @@ public class ModeleGlouton implements Solveur {
                 return true;
             }
 
-            case 1: { // Ajout Pool → Box (STRICT)
+            case 1: { // Ajout Pool → Box (Compatible)
                 if (nonAffectes.isEmpty())
                     return false;
                 Article article = nonAffectes.get(aleatoire.nextInt(nonAffectes.size()));
                 List<Box> boxesCompatibles = new ArrayList<>();
                 for (Box box : boxes) {
-                    if (box.getAbonne().isArticleExact(article) // STRICT
+                    // Check compatibilité élargie (Exact OU Adjacent)
+                    if (box.getAbonne().isArticleCompatible(article)
                             && box.getPoidsTotal() + article.getPoids() <= poidsMax) {
                         boxesCompatibles.add(box);
                     }
@@ -236,7 +246,7 @@ public class ModeleGlouton implements Solveur {
                 return true;
             }
 
-            case 2: { // Transfert Box → Box (STRICT)
+            case 2: { // Transfert Box → Box (Compatible)
                 if (boxes.size() < 2)
                     return false;
                 Box source = boxes.get(aleatoire.nextInt(boxes.size()));
@@ -247,7 +257,7 @@ public class ModeleGlouton implements Solveur {
                 List<Box> destinations = new ArrayList<>();
                 for (Box box : boxes) {
                     if (box != source
-                            && box.getAbonne().isArticleExact(article) // STRICT
+                            && box.getAbonne().isArticleCompatible(article) // Compatible élargi
                             && box.getPoidsTotal() + article.getPoids() <= poidsMax) {
                         destinations.add(box);
                     }
@@ -260,7 +270,7 @@ public class ModeleGlouton implements Solveur {
                 return true;
             }
 
-            case 3: { // Échange Box ↔ Box (STRICT)
+            case 3: { // Échange Box ↔ Box (Compatible croisé)
                 if (boxes.size() < 2)
                     return false;
                 Box b1 = boxes.get(aleatoire.nextInt(boxes.size()));
@@ -270,9 +280,9 @@ public class ModeleGlouton implements Solveur {
                 Article a1 = b1.getArticles().get(aleatoire.nextInt(b1.getArticles().size()));
                 Article a2 = b2.getArticles().get(aleatoire.nextInt(b2.getArticles().size()));
 
-                // STRICT checks
-                if (!b2.getAbonne().isArticleExact(a1)
-                        || !b1.getAbonne().isArticleExact(a2))
+                // Checks compatibilité élargie
+                if (!b2.getAbonne().isArticleCompatible(a1)
+                        || !b1.getAbonne().isArticleCompatible(a2))
                     return false;
 
                 double poids1Apres = b1.getPoidsTotal() - a1.getPoids() + a2.getPoids();

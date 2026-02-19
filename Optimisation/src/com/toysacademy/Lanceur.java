@@ -26,7 +26,7 @@ public class Lanceur {
     };
 
     public static void main(String[] args) {
-        String cheminFichier = args.length > 0 ? args[0] : "./Optimisation/data/exemple.csv";
+        String cheminFichier = args.length > 0 ? args[0] : "./data/pb5.csv";
 
         System.out.println("╔══════════════════════════════════════════════════════╗");
         System.out.println("║     ToyBoxing — Benchmarking ModeleGlouton          ║");
@@ -75,7 +75,7 @@ public class Lanceur {
                 long fin = System.nanoTime();
 
                 EvaluateurScoreGlouton evalGlouton = new EvaluateurScoreGlouton();
-                double score = evalGlouton.evaluer(solution, donnees.poidsMax);
+                double score = evalGlouton.evaluer(solution, donnees.poidsMax, donnees.prixMin, donnees.prixMax);
 
                 double duree = (fin - debut) / 1_000_000_000.0;
 
