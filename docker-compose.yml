@@ -2,23 +2,26 @@ services:
   # L'app PHP
   web-app:
     build: .
-    extra_hosts:
-      - "localhost:host-gateway" 
     ports:
       - "9000:80"
     depends_on:
       - db
-
+    networks:
+      default: # On le laisse dans le réseau par défaut
 
   # Ta BDD MariaDB
   db:
     image: mariadb:10.11
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: toyboxing
+      - MYSQL_ALLOW_EMPTY_PASSWORD=yes
+      - MYSQL_DATABASE=crazy_charly_day
     volumes:
       - db_data:/var/lib/mysql
+    networks:
+      default:
+        aliases:
+          - 127.0.0.1  # MAGIE : Le conteneur DB répondra quand le PHP appellera 127.0.0.1
 
   # Ton interface de gestion
   phpmyadmin:
@@ -27,9 +30,8 @@ services:
       - "8888:80"
     environment:
       - PMA_HOST=db
-
-  
+    depends_on:
+      - db
 
 volumes:
   db_data:
-

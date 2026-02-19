@@ -13,4 +13,6 @@ WORKDIR /var/www/html
 # On copie UNIQUEMENT le contenu de toyboxing-app vers /var/www/html
 COPY toyboxing-app/ .
 
+RUN sed -i "s/127.0.0.1/db/g" src/Database.php
+
 RUN chown -R www-data:www-data /var/www/html
