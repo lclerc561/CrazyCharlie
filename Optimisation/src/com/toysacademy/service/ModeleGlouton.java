@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
  * - Pas de calibrage prix
  * - Pas d'optimisation multi-enfants spécifique
  */
-public class ModeleGlouton implements Solveur {
+public class ModeleGlouton implements Algo {
 
     private final EvaluateurScoreGlouton evaluateur = new EvaluateurScoreGlouton();
     private final Random aleatoire = new Random(42);

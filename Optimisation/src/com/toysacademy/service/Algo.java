@@ -7,7 +7,7 @@ import java.util.List;
  * Interface commune pour tous les solveurs (modèles) d'optimisation.
  * Chaque implémentation représente une stratégie/algorithme différent.
  */
-public interface Solveur {
+public interface Algo {
 
     /**
      * Résout le problème d'optimisation des toy box (avec prix).

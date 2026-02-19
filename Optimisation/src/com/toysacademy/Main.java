@@ -27,7 +27,7 @@ public class Main {
             CSVManager csvManager = new CSVManager();
 
             // Modèle Glouton
-            Solveur modeleGlouton = new ModeleGlouton();
+            Algo modeleGlouton = new ModeleGlouton();
             Composition solutionGlouton = modeleGlouton.resoudre(
                     donnees.abonnes, donnees.articles, donnees.poidsMax);
             double scoreGlouton = evaluateurGlouton.evaluer(solutionGlouton, donnees.poidsMax);

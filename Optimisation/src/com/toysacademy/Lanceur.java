@@ -21,7 +21,7 @@ import com.toysacademy.service.*;
 public class Lanceur {
 
     // Liste des modèles disponibles (Uniquement ModeleGlouton)
-    private static final Solveur[] MODELES = {
+    private static final Algo[] MODELES = {
             new ModeleGlouton()
     };
 
@@ -63,7 +63,7 @@ public class Lanceur {
             String meilleurNom = "";
 
             for (int i = 0; i < MODELES.length; i++) {
-                Solveur modele = MODELES[i];
+                Algo modele = MODELES[i];
                 noms[i] = modele.getNom();
 
                 System.out.println("► Exécution de " + noms[i] + "...");

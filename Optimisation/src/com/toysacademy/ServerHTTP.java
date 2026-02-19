@@ -10,7 +10,7 @@ import com.toysacademy.io.CSVManager;
 import com.toysacademy.model.Composition;
 import com.toysacademy.service.EvaluateurScoreGlouton;
 import com.toysacademy.service.ModeleGlouton;
-import com.toysacademy.service.Solveur;
+import com.toysacademy.service.Algo;
 
 import java.io.*;
 import java.net.InetSocketAddress;
@@ -21,7 +21,7 @@ import java.util.UUID;
 public class ServerHTTP {
 
     // Vous pouvez en ajouter d'autres plus tard (Recuit, etc.)
-    private static final Solveur[] MODELES = {
+    private static final Algo[] MODELES = {
             new ModeleGlouton()
     };
 
@@ -93,7 +93,7 @@ public class ServerHTTP {
             Composition meilleureSolution = null;
             double meilleurScore = Double.NEGATIVE_INFINITY;
 
-            for (Solveur modele : MODELES) {
+            for (Algo modele : MODELES) {
                 Composition solution = modele.resoudre(
                         donnees.abonnes,
                         donnees.articles,
